@@ -1,0 +1,8 @@
+export const Actions = {
+  SEARCH: 'SEARCH',
+  GET_TOKENS: 'GET_TOKENS',
+  CHECK: 'CHECK',
+  LOADING: 'LOADING',
+  ERROR: 'ERROR',
+  REMOVE_ERROR: 'REMOVE_ERROR'
+}

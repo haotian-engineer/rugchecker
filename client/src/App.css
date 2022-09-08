@@ -1,0 +1,384 @@
+:root,
+:host {
+    --nav-height: 70px;
+    --nav-input-width: 24rem;
+}
+
+a:hover {
+    color: orange !important;
+}
+
+.loading {
+    width: 100vw;
+    height: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background-color: #ffffffdb;
+    color: red;
+    font-size: 50px;
+    font-weight: 800;
+    text-align: center;
+}
+
+.loading img {
+    padding: 40vh;
+    width: 80px;
+}
+
+.showOnSmall {
+    display: none;
+}
+
+.alert {
+    position: fixed;
+    padding: 10px;
+    font-size: 25px;
+    top: 75px;
+    right: 10px;
+    z-index: 1;
+    text-align: center;
+    border-radius: 10px;
+    color: white;
+}
+.error {
+    background: red;
+}
+.success {
+    background: green;
+}
+
+body {
+    padding: 0;
+    margin: 0;
+}
+
+/* Navbar */
+.nav {
+    background-color: white;
+    height: var(--nav-height);
+    display: flex;
+    align-items: center;
+}
+
+.nav a {
+    text-decoration: none;
+}
+
+.nav .navTitle {
+    font-family: Audiowide;
+    color: #f84b4e;
+    text-decoration: none;
+    text-transform: none;
+    font-weight: 700;
+    font-size: 2.4em;
+    text-shadow: 3px 3px #838c9c;
+    margin-left: 0.5em;
+}
+
+/* Main */
+.main {
+    position: relative;
+    padding: 20px;
+    color: white;
+    background-color: #121439;
+    background-image: url(https://www.bscchecker.app/wp-content/uploads/home-pricing-bg.svg);
+    background-attachment: scroll;
+    background-position: 90% 100px;
+    background-repeat: no-repeat;
+    background-size: 500px;
+    min-height: 100vh;
+}
+
+/* Top */
+.top {
+    text-align: center;
+    margin-top: 30px;
+    margin-bottom: 30px;
+}
+
+.top .title {
+    font-size: 40px;
+    font-family: cursive;
+    padding-bottom: 50px;
+}
+
+.top .searchBox {
+    background: white;
+    padding: 75px 0;
+    border-radius: 10px;
+    width: 80%;
+    margin: auto;
+}
+
+.top .searchBox .title {
+    color: #3d1a4a;
+    font-family: monospace;
+    font-size: 30px;
+    font-weight: 800;
+}
+
+.top .search {
+    position: relative;
+    width: 60%;
+    margin: auto;
+    margin-top: 30px;
+}
+
+.top .search svg {
+    position: absolute;
+    top: 1rem;
+    left: 0.5rem;
+    width: 20px;
+    height: 20px;
+    color: #293241;
+}
+
+.top input {
+    border: 1px solid #F84B4E;
+    transition: 0.5s;
+    outline: none;
+    text-align: center;
+    width: 100%;
+    height: 50px;
+    border-radius: 5px;
+    padding-left: 30px;
+    font-size: 15px;
+}
+
+.top .searched:hover {
+    cursor: pointer;
+    background: #838c9c;
+}
+
+.top .searched {
+    width: 100%;
+    overflow-y: scroll;
+    background-color: rgb(217 217 217 / 84%);
+    color: black;
+    border: 1px solid grey;
+    border-radius: 10px;
+    padding: 10px 0px;
+    margin-top: 10px;
+}
+
+.top .searched div {
+    padding: 0 15px;
+}
+
+/* Bottom */
+.bottom {
+    display: flex;
+    justify-content: space-evenly;
+    margin: 10px 0 20px 0;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: stretch;
+}
+
+/* Box */
+.box {
+    background-color: #e1e1e1;
+    color: black;
+    border: 1px solid grey;
+    border-radius: 10px;
+    box-shadow: 10px 5px 5px grey;
+    padding: 20px;
+    width: 300px;
+    margin-bottom: 10px;
+}
+
+.box .title {
+    font-size: 25px;
+    font-weight: 800;
+    text-align: center;
+    padding: 10px;
+}
+
+.box .title a {
+    text-decoration: none;
+    color: #0846a8;
+}
+
+.box .link {
+    text-align: right;
+    margin-top: 20px;
+}
+
+.box .link a {
+    color: black;
+}
+
+.tokenList .item a {
+    text-decoration: none;
+    color: black;
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+/* TrendingTokens */
+.main .boxes {
+    padding: 20px;
+    text-align: center;
+    color: black;
+}
+
+.main .boxes h2 {
+    color: white;
+    font-size: 35px;
+}
+
+.main .tokenboxes table {
+    background-color: white;
+    margin: auto;
+    border-radius: 10px;
+    padding: 15px;
+    margin-bottom: 30px;
+}
+
+.main .tokenboxes table tbody tr:hover {
+    background-color: rgba(151, 151, 151, 0.747);
+    cursor: pointer;
+}
+
+.main .tokenboxes table thead {
+    color: darkslategrey;
+}
+
+.main .tokenboxes table td,
+.main .tokenboxes table th {
+    padding: 5px 20px;
+}
+
+/* token */
+.tokenInfo {
+    padding: 10px;
+    margin-top: 15px;
+}
+
+.tokenInfo .title h1 {
+    font-size: 25px;
+    color: #2e6ed6;
+    margin-bottom: 0;
+}
+
+.tokenInfo .title h2 {
+    font-size: 18px;
+    margin-top: 10px;
+    color: grey;
+}
+
+.tokenInfo .links {
+    text-align: center;
+    color: black;
+    background: white;
+    border-radius: 10px;
+    padding: 20px 40px;
+    margin: 30px auto;
+    font-size: 17px;
+}
+
+.tokenInfo .links .linkGroup {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+}
+
+.tokenInfo .links .linkGroup tr {
+    align-items: center;
+}
+
+.tokenInfo .links .linkGroup th {
+    font-weight: 800;
+    padding-right: 20px;
+}
+
+.tokenInfo .links .linkGroup td {
+    display: flex;
+    align-items: center;
+}
+
+.tokenInfo .links .linkGroup td a {
+    padding-right: 20px;
+}
+
+.tokenInfo .links .linkGroup td img {
+    width: 20px;
+}
+
+.tokenInfo .mal {
+    background-color: white;
+    color: black;
+    padding: 20px 40px;
+    border-radius: 10px;
+}
+
+.tokenInfo .mal div {
+    font-size: 20px;
+    padding: 10px;
+}
+
+/* Footer */
+.footer {
+    background-color: #121738;
+    border-top: 1px solid white;
+    padding: 20px 100px;
+    color: white;
+}
+
+.footer .desc {
+    text-align: justify;
+}
+
+.footer .contact {
+    text-align: center;
+    margin: 20px;
+}
+
+.footer .contact a {
+    color: white;
+}
+
+.footer .copyright {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+@media screen and (max-width: 860px) {
+    .hideOnMedium {
+        display: none;
+    }
+}
+
+@media screen and (max-width: 600px) {
+    .hideOnSmall {
+        display: none;
+    }
+
+    .showOnSmall {
+        display: block;
+    }
+
+    .main .tokenboxes table th,
+    .main .tokenboxes table td {
+        padding: 5px;
+    }
+
+    .main .boxes h2 {
+        font-size: 25px;
+    }
+
+    .footer {
+        padding: 20px;
+    }
+
+}
+
+@media screen and (max-width: 400px) {
+
+    .main .tokenboxes table th,
+    .main .tokenboxes table td {
+        font-size: 12px;
+    }
+}
