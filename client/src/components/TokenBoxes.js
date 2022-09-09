@@ -14,7 +14,7 @@ const TokenBoxes = ({ link }) => {
     navigate(`/token/${addr}`)
   }
 
-  if (link == "searched") {
+  if (link === "searched") {
     tokens.map((token) => {
       let interval = new Date(Date.now() - Date.parse(token.timestamp));
       let ago = "";

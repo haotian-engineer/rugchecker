@@ -7,7 +7,7 @@ const Box = ({ title, apis }) => {
 
   const { tokens } = useSelector((state) => state.data);
   let list = [];
-  if (apis == "trending") {
+  if (apis === "trending") {
     tokens.map((token) => {
       if (list.length < 10) {
         let interval = new Date(Date.now() - Date.parse(token.timestamp));
@@ -35,7 +35,7 @@ const Box = ({ title, apis }) => {
         )
       }
     })
-  } else if (apis == "scams") {
+  } else if (apis === "scams") {
     tokens.map((token) => {
       if (list.length < 10 && token.isMalicious) {
         let interval = new Date(Date.now() - Date.parse(token.timestamp));

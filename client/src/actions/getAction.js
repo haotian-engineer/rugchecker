@@ -54,7 +54,6 @@ export const scan = (contract) => async (dispatch) => {
     let honey;
     let malicious = true;
     let type = "none";
-    const contractCodeRequest = await axios.get(`${BASE_TOKEN_URI}?module=contract&action=getsourcecode&address=${contract.contractAddress}`);
     const contractAbi = [
       {
         inputs: [],
@@ -131,27 +130,27 @@ export const scan = (contract) => async (dispatch) => {
         type: "function",
       },
     ];
-    
+
     const TEST_AMOUNT = 10 ** 17 * 5;
     const GAS_LIMIT = "4500000";
-    
+
     const RunHoneyContract = async (
-      from, honeyCheckerAddress, token, router, rcpAddress ) => {
+      from, honeyCheckerAddress, token, router, rcpAddress) => {
       let buyTax = 0;
       let sellTax = 0;
       let buyGasCost = 0;
       let sellGasCost = 0;
       let isHoneypot = 0;
-    
+
       const web3 = new Web3(rcpAddress);
       const gasPrice = await web3.eth.getGasPrice();
-    
+
       const honeyCheck = new web3.eth.Contract(contractAbi);
-    
+
       const data = honeyCheck.methods.honeyCheck(token, router).encodeABI();
-    
+
       let honeyTxResult;
-    
+
       try {
         honeyTxResult = await web3.eth.call({
           from,
@@ -170,22 +169,22 @@ export const scan = (contract) => async (dispatch) => {
           error: error,
         };
       }
-    
+
       const decoded = web3.eth.abi.decodeParameter(
         "tuple(uint256,uint256,uint256,uint256,uint256,uint256)",
         honeyTxResult
       );
-    
+
       buyGasCost = decoded[3];
       sellGasCost = decoded[4];
-    
+
       const res = {
         buyResult: decoded[0],
         leftOver: decoded[1],
         sellResult: decoded[2],
         expectedAmount: decoded[5],
       };
-    
+
       buyTax =
         (1 -
           new BigNumber(res.buyResult)
@@ -197,9 +196,9 @@ export const scan = (contract) => async (dispatch) => {
           new BigNumber(res.sellResult)
             .dividedBy(new BigNumber(TEST_AMOUNT))
             .toNumber()) *
-          100 -
+        100 -
         buyTax;
-    
+      console.log(buyTax + "--", sellTax + "--", buyGasCost + "--", sellGasCost + "--", isHoneypot + "--")
       return {
         buyTax,
         sellTax,
@@ -208,7 +207,7 @@ export const scan = (contract) => async (dispatch) => {
         isHoneypot,
       };
     };
-    await RunHoneyContract(
+    const analyze = await RunHoneyContract(
       "0x2772fcbf3e6d9128bccec98d5138ab63c712cb7b",
       "0xF662d39558F57031F2Caa45dEaFCD5341D5c7C1E",
       contract.contractAddress,
@@ -216,12 +215,19 @@ export const scan = (contract) => async (dispatch) => {
       "https://rpc03-sg.dogechain.dog"
     )
       .catch()
-      .then((e) => {honey = e.isHoneypot});
-
-    if (contractCodeRequest['data']['result'][0]['ABI'] == "Contract source code not verified") {
+      .then((e) => { honey = e.isHoneypot });
+    let contractCodeRequest;
+    const contractCodeAbi = await axios.get(`${BASE_TOKEN_URI}?module=contract&action=getabi&address=${contract.contractAddress}`);
+    if (contractCodeAbi.data.message !== "Contract source code not verified"){
+      contractCodeRequest = await axios.get(`${BASE_TOKEN_URI}?module=contract&action=getsourcecode&address=${contract.contractAddress}`);
+      console.log("in")
+    }
+      console.log("abi", contractCodeAbi.data.message);
+    console.log("abi", contractCodeAbi);
+    if (contractCodeAbi.data.message === "Contract source code not verified") {
       type = "Contract source code isn't verified.";
     }
-    else if (contractCodeRequest['data']['result'][0]['IsProxy'] == true) {
+    else if (contractCodeRequest && contractCodeRequest['data']['result'][0]['IsProxy'] === true) {
       type = "Contract use proxy.";
     }
     else if (honey) {
@@ -231,7 +237,7 @@ export const scan = (contract) => async (dispatch) => {
       malicious = false;
       type = "Contract is clean."
     }
-
+    console.log("analyze", analyze);
     const payload = await axios.post(`${BASE_SERVER_URI}/tokens`, {
       address: contract.contractAddress,
       name: contract.name,
@@ -239,19 +245,17 @@ export const scan = (contract) => async (dispatch) => {
       total: contract.totalSupply,
       type: contract.type,
       isMalicious: malicious,
-      malType: type
+      malType: type,
     })
     dispatch({
       type: Actions.CHECK,
       payload: payload.data
     })
-    if(malicious)
+    if (malicious)
       dispatch(alert("error", type));
-    else 
+    else
       dispatch(alert("success", type));
   } catch (err) {
-    if(err.message==="Request failed with status code 500")
-      err.message = "Contract Not Verified."
-      dispatch(alert("error", err.message));
+    dispatch(alert("error", err.message));
   }
 }

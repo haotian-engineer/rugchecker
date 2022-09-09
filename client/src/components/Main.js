@@ -18,7 +18,7 @@ const Main = () => {
       <Fade direction="up">
         <Bottom />
       </Fade>
-      {loading && <div className='loading'><img src='loading/ecb.gif' /></div>}
+      {loading && <div className='loading'><img src='loading/ecb.gif' alt="loading..." /></div>}
     </Section>
   );
 };
