@@ -26,6 +26,46 @@ const TokenSchema = new mongoose.Schema({
     default: false
   },
   malType: {
+    type: Array,
+    required: true
+  },
+  buyTax: {
+    type: String,
+    required: true
+  },
+  sellTax: {
+    type: String,
+    required: true
+  },
+  buyGasCost: {
+    type: String,
+    required: true
+  },
+  sellGasCost: {
+    type: String,
+    required: true
+  },
+  circulating: {
+    type: String,
+    required: true
+  },
+  cRate: {
+    type: String,
+    required: true
+  },
+  oRate: {
+    type: String,
+    required: true
+  },
+  currentLiquidity: {
+    type: String,
+    required: true
+  },
+  burnt: {
+    type: String,
+    required: true
+  },
+  creatorLiquidity: {
     type: String,
     required: true
   },

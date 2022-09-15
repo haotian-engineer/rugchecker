@@ -19,6 +19,7 @@ a:hover {
     font-size: 50px;
     font-weight: 800;
     text-align: center;
+    z-index: 1;
 }
 
 .loading img {
@@ -312,11 +313,56 @@ body {
     color: black;
     padding: 20px 40px;
     border-radius: 10px;
+    margin-top: 10px;
 }
 
 .tokenInfo .mal div {
     font-size: 20px;
     padding: 10px;
+}
+
+.tokenInfo .mal .analyze {
+    margin: 10px 0;
+}
+.tokenInfo .mal .analyze .title {
+    font-weight: 800;
+}
+.tokenInfo .mal .analyze .criteria {
+    display: flex;
+    align-items: center;
+}
+.tokenInfo .mal .analyze .description {
+    font-size: 15px;
+    color: grey;
+    padding-left: 40px
+}
+.tokenInfo .mal .analyze .criteria .cross {
+    color: red;
+}
+.tokenInfo .mal .inputSection {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    align-items: center;
+}
+.tokenInfo .mal .inputSection .search {
+    margin: 10px;
+    height: 36px;
+    background: #23a923;
+    border: 0px;
+    color: white;
+    border-radius: 10px;
+    width: 75px;
+}
+.tokenInfo .mal .inputSection .search:hover {
+    cursor: pointer;
+    background: #23a993;
+}
+.tokenInfo .mal .inputSection .search:disabled {
+    cursor: not-allowed;
+}
+.tokenInfo .mal .inputSection input {
+    height: 30px;
 }
 
 /* Footer */

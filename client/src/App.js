@@ -9,6 +9,7 @@ import Trending from './layout/Trending';
 import Scams from './layout/Scams';
 import Token from './layout/Token';
 import Error from './layout/Error';
+import Loading from './components/Loading';
 
 import store from './store';
 
@@ -20,6 +21,7 @@ const App = () => {
     <Provider store={store}>
       <Navbar />
       <Error />
+      <Loading />
       <Router>
         <Routes>
           <Route path="/" element={<Landing />} />

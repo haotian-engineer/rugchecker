@@ -4,6 +4,7 @@ const initialState = {
   searched: {},
   tokens: [],
   loading: false,
+  isThere: false,
   errors: {}
 };
 
@@ -38,12 +39,20 @@ const getReducer = (state = initialState, action) => {
         tokens: payload
       }
     }
+    case Actions.QUERY_SEARCH: {
+      return {
+        ...state,
+        loading: false,
+        isThere: payload
+      }
+    }
     case Actions.ERROR: {
       return {
         ...state,
         loading: false,
         errors: payload,
-        searched: {}
+        searched: {},
+        isThere: false
       }
     }
     case Actions.REMOVE_ERROR: {
