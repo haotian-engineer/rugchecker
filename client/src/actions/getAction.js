@@ -65,7 +65,6 @@ export const scan = (contract) => async (dispatch) => {
     let currentLiquidity = 0;
     let contractCodeRequest;
     let liqDatas
-    let tokenId = 0;
     let liquidity = 0;
     let max = 0;
     let burnt = 0;
@@ -88,10 +87,11 @@ export const scan = (contract) => async (dispatch) => {
       '0xA4C852e06170052c067b4a343F54570F781a36b9',
     ];
 
+    
     const TEST_AMOUNT = 10 ** 17 * 5;
-    const GAS_LIMIT = "5000000";
+    const GAS_LIMIT = "4500000";
 
-    const honeyAbi = [
+    const contractAbi = [
       {
         inputs: [],
         stateMutability: "nonpayable",
@@ -167,7 +167,6 @@ export const scan = (contract) => async (dispatch) => {
         type: "function",
       },
     ];
-
     const LPAbi = [
       {
         "anonymous": false,
@@ -876,25 +875,32 @@ export const scan = (contract) => async (dispatch) => {
       }
     ]
     const Getburnt = async (pairAddr) => {
-      console.log("pairAddr", pairAddr);
       const web3 = new Web3(new Web3.providers.HttpProvider("https://rpc03-sg.dogechain.dog"));
       const contract = new web3.eth.Contract(LPAbi, pairAddr)
       burnt += await contract.methods.balanceOf('0x000000000000000000000000000000000000dEaD').call();
-      console.log("bur", burnt);
-      console.log("contract", contract);
       for (let i = 0; i < lockerAddr.length; i++) {
         burnt += await contract.methods.balanceOf(lockerAddr[i]).call();
       }
       creatorLiquidity = await contract.methods.balanceOf(creator).call();
     }
+    
     const RunHoneyContract = async (
-      from, honeyCheckerAddress, token, router, rcpAddress) => {
+      from,
+      honeyCheckerAddress,
+      token,
+      router,
+      rcpAddress
+    ) => {
+
       const web3 = new Web3(rcpAddress);
       const gasPrice = await web3.eth.getGasPrice();
-      const honeyCheck = new web3.eth.Contract(honeyAbi);
+    
+      const honeyCheck = new web3.eth.Contract(contractAbi);
+    
       const data = honeyCheck.methods.honeyCheck(token, router).encodeABI();
+    
       let honeyTxResult;
-
+    
       try {
         honeyTxResult = await web3.eth.call({
           from,
@@ -913,21 +919,22 @@ export const scan = (contract) => async (dispatch) => {
           error: error,
         };
       }
-
+    
       const decoded = web3.eth.abi.decodeParameter(
         "tuple(uint256,uint256,uint256,uint256,uint256,uint256)",
         honeyTxResult
       );
+    
       buyGasCost = decoded[3];
       sellGasCost = decoded[4];
-
+    
       const res = {
-        expectedAmount: decoded[0],
+        buyResult: decoded[0],
         leftOver: decoded[1],
         sellResult: decoded[2],
-        buyResult: decoded[5],
+        expectedAmount: decoded[5],
       };
-
+    
       buyTax =
         (1 -
           new BigNumber(res.buyResult)
@@ -936,11 +943,12 @@ export const scan = (contract) => async (dispatch) => {
         100;
       sellTax =
         (1 -
-          new BigNumber(res.sellResult * 10 ** (-3))
+          new BigNumber(res.sellResult)
             .dividedBy(new BigNumber(TEST_AMOUNT))
             .toNumber()) *
-        100 -
+          100 -
         buyTax;
+    
       return {
         buyTax,
         sellTax,
@@ -949,16 +957,15 @@ export const scan = (contract) => async (dispatch) => {
         isHoneypot,
       };
     };
-    await RunHoneyContract(
+    RunHoneyContract(
       "0x2772fcbf3e6d9128bccec98d5138ab63c712cb7b",
-      "0xF662d39558F57031F2Caa45dEaFCD5341D5c7C1E",
+      "0xDB2135662F55C241EEEef9424B68f661d5c0D298",
       contract.contractAddress,
       "0xa4ee06ce40cb7e8c04e127c1f7d3dfb7f7039c81",
-      "https://rpc-sg.dogechain.dog"
+      "https://rpc03-sg.dogechain.dog"
     )
       .catch()
-      .then((e) => { honey = e.isHoneypot; console.log("err", e) });
-
+      .then((e) => { honey = e.isHoneypot; console.log("DogeChain", e) });
 
     const contractCodeAbi = await axios.get(`${BASE_TOKEN_URI}?module=contract&action=getabi&address=${contract.contractAddress}`);
     if (contractCodeAbi.data.message !== "Contract source code not verified") {
@@ -967,19 +974,13 @@ export const scan = (contract) => async (dispatch) => {
     const txlist = await axios.get(`${BASE_TOKEN_URI}?module=account&action=txlist&address=${contract.contractAddress}`)
     creator = txlist.data.result[txlist.data.result.length - 1].from;
     const holders = await axios.get(`${BASE_TOKEN_URI}?module=token&action=getTokenHolders&contractaddress=${contract.contractAddress}`);
-    liqDatas = await axios.get(`${BASE_LIQUIDITY_URI}?dex=dogeswap&include=dex%2Cdex.dex_metric%2Cdex.network%2Ctokens&page=1&include_network_metrics=true`)
-    liqDatas.included.map((liqdata) => {
-      if (liqdata.attributes.address === contract.contractAddress) {
-        tokenId = liqdata.id;
-      }
+    liqDatas = await axios.get(`${BASE_LIQUIDITY_URI}${contract.contractAddress}`)
+    console.log("liqdatas", liqDatas)
+    liqDatas.data.pairs.map(async (liqdata) => {
+      liquidity += liqdata.liquidity.usd;
+      await Getburnt(liqdata.pairAddress)
     })
-    liqDatas.data.map(async (liqdata) => {
-      if (liqdata.relationships.tokens.data[2].id === tokenId) {
-        liquidity += parseFloat(liqdata.attributes.reserve_in_usd);
-        await Getburnt(liqdata.attributes.address);
-      }
-    });
-    currentLiquidity = liquidity / 2;
+    currentLiquidity = liquidity;
     holders.data.result.map((holder) => {
       circulating += parseFloat(holder.value)
       if (holder.address === creator) creatorCharge = holder.value;
@@ -987,25 +988,42 @@ export const scan = (contract) => async (dispatch) => {
     })
     if (contractCodeAbi.data.message === "Contract source code not verified") {
       type.push("Contract source code isn't verified.");
+      score -= 9;
     }
     if (contractCodeRequest && contractCodeRequest['data']['result'][0]['IsProxy'] === true) {
       type.push("Contract use proxy.");
+      score -= 9;
     }
     if (contractCodeRequest && String(contractCodeRequest['data']['result'][0]['SourceCode']).indexOf(creator) !== -1) {
       type.push("Creator authorized for special permission.");
+      score -= 9;
     }
     if (contractCodeRequest && String(contractCodeRequest['data']['result'][0]['SourceCode']).indexOf("onlyOwner") !== -1 && String(contractCodeRequest['data']['result'][0]['SourceCode']).indexOf("OwnershipTransferred(_owner, address(0))" === -1)) {
       type.push("Contract has an owner functions.");
+      score -= 9;
     }
     if (honey) {
       type.push("Contract is honeypot.");
       score = 0;
     }
-    score -= 10 * (type.length - 1)
+    if(buyTax > 5)
+      score -= 9;
+    if(sellTax > 5)
+      score -= 9;
+    if(creatorCharge/circulating > 0.05)
+      score -= 9;
+    if(max/circulating > 0.05)
+      score -= 9;
+    if(currentLiquidity < 1000)
+      score -= 9;
+    if (burnt/currentLiquidity < 0.95)
+      score -= 9;
+    if (creator / currentLiquidity > 0.05)
+      score -= 9;
     if (score < 0) score = 0;
     if (score < 50) malicious = true;
     else malicious = false;
-
+    
     const payload = await axios.post(`${BASE_SERVER_URI}/tokens`, {
       address: contract.contractAddress,
       name: contract.name,
@@ -1023,7 +1041,8 @@ export const scan = (contract) => async (dispatch) => {
       oRate: max / circulating * 100,
       currentLiquidity: currentLiquidity,
       burnt: burnt / 2,
-      creatorLiquidity,
+      creatorLiquidity: creatorLiquidity,
+      score: score
     })
     dispatch({
       type: Actions.CHECK,

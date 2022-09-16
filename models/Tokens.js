@@ -69,6 +69,10 @@ const TokenSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  score: {
+    type: String,
+    required: true
+  },
   timestamp: {
     type: Date,
     required: true

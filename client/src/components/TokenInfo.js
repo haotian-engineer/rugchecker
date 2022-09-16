@@ -17,6 +17,8 @@ const TokenInfo = ({ addr }) => {
   const [query, setQuery] = useState("");
 
   let token;
+  let burnRate = 0;
+  let creatorRate = 0;
 
   const onChange = (e) => {
     setQuery(e.target.value);
@@ -33,7 +35,13 @@ const TokenInfo = ({ addr }) => {
       token = tk;
     }
   })
-
+  
+  if (token && parseFloat(token.currentLiquidity) !== 0) {
+    console.log("liqui", token.currentLiquidity)
+    burnRate = parseFloat(token.burnt/token.currentLiquidity).toFixed(2);
+    creatorRate = parseFloat(token.creator / token.currentLiquidity).toFixed(2);
+  }
+  
   return (
     <Section className="main">
       {token &&
@@ -64,8 +72,8 @@ const TokenInfo = ({ addr }) => {
           </table>
           <div className='mal'>
             <div className='analyze'>
-              <div className='title'>Summary</div>
-              <div className='description'>The audit score ***50/100 is a measure of how well the token contract and characteristics meet the criteria for safety.  Results may not be applicable if the token is in presale.  Automated scanners like this one are limited and not always completely accurate.  A token with a high score may still have hidden malicious code. The score is not advice and should be considered along with other factors. Always do your own research and consult multiple sources of information.</div>
+              <div className='title'>Summary {token.score}/100</div>
+              <div className='description'>The audit score {token.score}/100 is a measure of how well the token contract and characteristics meet the criteria for safety.  Results may not be applicable if the token is in presale.  Automated scanners like this one are limited and not always completely accurate.  A token with a high score may still have hidden malicious code. The score is not advice and should be considered along with other factors. Always do your own research and consult multiple sources of information.</div>
             </div>
             <div className='analyze'>
               <div className='title'>Swap Analysis</div>
@@ -76,14 +84,14 @@ const TokenInfo = ({ addr }) => {
               {token.malType.includes("Contract is honeypot.") && <div className='description'>This token appears to be unsellable (ignore for presale).</div>}
               <div className='criteria'>
                 {(token.buyTax < 0 || token.buyTax > 5) ? <div className='cross'>✘</div> : <div className='tick'>✔</div>}
-                <span>Buy fee is less than 5% ({token.buyTax >= 0 ? token.buyTax : "-"})</span>
+                <span>Buy fee is less than 5% ({token.buyTax >= 0 ? parseFloat(token.buyTax).toFixed(2) : "-"})</span>
               </div>
-              <div className='description'>This token has {token.buyTax >= 0 ? token.buyTax + "%" : "no"} buy fee.</div>
+              <div className='description'>This token has {token.buyTax >= 0 ? parseFloat(token.buyTax).toFixed(2) + "%" : "no"} buy fee.</div>
               <div className='criteria'>
                 {(token.sellTax < 0 || token.sellTax > 5) ? <div className='cross'>✘</div> : <div className='tick'>✔</div>}
-                <span>Sell fee is less than 5% ({token.sellTax >= 0 ? token.sellTax : "-"})</span>
+                <span>Sell fee is less than 5% ({token.sellTax >= 0 ? parseFloat(token.sellTax).toFixed(2) : "-"})</span>
               </div>
-              <div className='description'>This token has {token.sellTax >= 0 ? token.buyTax + "%" : "no"} sell fee.</div>
+              <div className='description'>This token has {token.sellTax >= 0 ? parseFloat(token.sellTax).toFixed(2) + "%" : "no"} sell fee.</div>
               {token.sellTax > 5 && <div className='description'>Excessive fees are often sold for profit which can negatively affect the token's price.  Ask the project team how fees are being allocated and used.</div>}
             </div>
             <div className='analyze'>
@@ -117,18 +125,18 @@ const TokenInfo = ({ addr }) => {
             <div className='analyze'>
               <div className='title'>Liquidity Analysis</div>
               <div className='criteria'>
-                {token.currentLiquidity < 500 ? <div className='cross'>✘</div> : <div className='tick'>✔</div>}
+                {token.currentLiquidity < 1000 ? <div className='cross'>✘</div> : <div className='tick'>✔</div>}
                 <span>Adequate current liquidity</span>
               </div>
-              {token.currentLiquidity < 500 && <div className='description'>	Not enough liquidity is present which could potentially cause high slippage and other problems when swapping (ignore for presale).</div>}
+              {token.currentLiquidity < 1000 && <div className='description'>	Not enough liquidity is present which could potentially cause high slippage and other problems when swapping (ignore for presale).</div>}
               <div className='criteria'>
-                {token.burnt / token.currentLiquidity < 0.95 ? <div className='cross'>✘</div> : <div className='tick'>✔</div>}
-                <span>At least 95% of liquidity burned/locked for 15 days ({parseFloat(token.burnt / token.currentLiquidity).toFixed(2) * 100}%)</span>
+                {burnRate < 0.95 ? <div className='cross'>✘</div> : <div className='tick'>✔</div>}
+                <span>At least 95% of liquidity burned/locked for 15 days ({parseFloat(burnRate).toFixed(2) * 100}%)</span>
               </div>
-              {token.burnt / token.currentLiquidity < 0.95 && <div className='description'>	Not enough liquidity is secured for the minimum duration which could allow for significant amounts to be removed (rug pull). NOTE: this test only checks well-known lockers and will not accurately represent locked liquidity from custom locking/vesting contracts.</div>}
+              {burnRate < 0.95 && <div className='description'>	Not enough liquidity is secured for the minimum duration which could allow for significant amounts to be removed (rug pull). NOTE: this test only checks well-known lockers and will not accurately represent locked liquidity from custom locking/vesting contracts.</div>}
               <div className='criteria'>
-                {token.creator / token.currentLiquidity < 0.05 ? <div className='cross'>✘</div> : <div className='tick'>✔</div>}
-                <span>Creator wallet contains less than 5% of liquidity ({parseFloat(token.creatorLiquidity / token.currentLiquidity).toFixed(2) * 100}%)</span>
+                {creatorRate > 0.05 ? <div className='cross'>✘</div> : <div className='tick'>✔</div>}
+                <span>Creator wallet contains less than 5% of liquidity ({parseFloat(creatorRate).toFixed(2) * 100}%)</span>
               </div>
             </div>
           </div>
@@ -138,10 +146,6 @@ const TokenInfo = ({ addr }) => {
               <button className='search' onClick={search} disabled={token.malType.includes("Contract source code isn't verified.")}>Search</button>
             </div>
             <div className='queryResult'>Result: {token.malType.includes("Contract source code isn't verified.") ? "Contract is not verified." : isThere && `There is "${query}" string in contract.`}</div>
-            <div><strong>Malicious:</strong> {String(token.isMalicious)}</div>
-            <div><strong>Type:</strong> {token.malType}</div>
-            <div><strong>Check on:</strong> <a href={`https://explorer.dogechain.dog/address/${addr}`}>DogeChain Explorer</a></div>
-            <div><strong>Contract Code:</strong> <a href={`https://explorer.dogechain.dog/address/${addr}/contracts`}>Dogechain Explorer</a></div>
           </div>
         </div>
       }
