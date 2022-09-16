@@ -4,7 +4,7 @@ const initialState = {
   searched: {},
   tokens: [],
   loading: false,
-  isThere: false,
+  isThere: [],
   errors: {}
 };
 

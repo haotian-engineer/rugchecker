@@ -1062,20 +1062,23 @@ export const searchonContract = (query, addr) => async (dispatch) => {
   try {
     dispatch({ type: Actions.LOADING });
     let contractCodeRequest;
-    let res;
+    let res = [];
     const contractCodeAbi = await axios.get(`${BASE_TOKEN_URI}?module=contract&action=getabi&address=${addr}`);
     if (contractCodeAbi.data.message !== "Contract source code not verified") {
       contractCodeRequest = await axios.get(`${BASE_TOKEN_URI}?module=contract&action=getsourcecode&address=${addr}`);
-      if (contractCodeRequest && String(contractCodeRequest['data']['result'][0]['SourceCode']).indexOf(query) === -1) {
-        res = false;
-      }
-      else res = true;
+      query.map(q => {
+        if (contractCodeRequest && String(contractCodeRequest['data']['result'][0]['SourceCode']).indexOf(q) === -1) {
+          res.push(false);
+        }
+        else res.push(true);
+      })
     }
     dispatch({
       type: Actions.QUERY_SEARCH,
       payload: res
     })
   } catch (err) {
+    console.log("err", err);
     dispatch(alert("error", err));
   }
 }

@@ -14,8 +14,11 @@ const TokenInfo = ({ addr }) => {
   let token;
   let burnRate = 0;
   let creatorRate = 0;
+  // search on contract
+  let query = ["Ownable", "burn", "sss"];
+  let res = ["minted", "burnt", "sssss"];
+  let report = [];
 
-  let query = "mint";
   useEffect(() => {
     dispatch(getTokens());
     dispatch(searchonContract(query, addr));
@@ -26,13 +29,20 @@ const TokenInfo = ({ addr }) => {
       token = tk;
     }
   })
-  
-  if (token && parseFloat(token.currentLiquidity) !== 0) {
-    console.log("liqui", token.currentLiquidity)
-    burnRate = parseFloat(token.burnt/token.currentLiquidity).toFixed(2);
-    creatorRate = parseFloat(token.creator / token.currentLiquidity).toFixed(2);
+
+  for (let i = 0; i < query.length; i++) {
+    if (isThere[i]) {
+      report.push(`${res[i]}`);
+    }
   }
-  
+  console.log("report", report)
+  console.log("isThere", isThere)
+
+  if (token && parseFloat(token.currentLiquidity) !== 0) {
+    burnRate = parseFloat(token.burnt / token.currentLiquidity).toFixed(2);
+    creatorRate = parseFloat(token.creatorLiquidity / token.currentLiquidity).toFixed(2);
+  }
+
   return (
     <Section className="main">
       {token &&
@@ -130,9 +140,12 @@ const TokenInfo = ({ addr }) => {
                 <span>Creator wallet contains less than 5% of liquidity ({parseFloat(creatorRate).toFixed(2) * 100}%)</span>
               </div>
             </div>
-          </div>
-          <div className='mal'>
-            <div className='queryResult'>Result: {token.malType.includes("Contract source code isn't verified.") ? "Contract is not verified." : isThere && `There is "${query}" string in contract.`}</div>
+            <div className='customeSearch'>
+              <hr />
+              {report.map(rep => 
+              <div className='queryResult'>{rep}</div>
+              )}
+            </div>
           </div>
         </div>
       }
