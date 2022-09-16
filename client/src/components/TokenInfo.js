@@ -2,34 +2,25 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import Section from './Section';
-import { alert, getTokens, searchonContract } from '../actions/getAction';
+import { getTokens, searchonContract } from '../actions/getAction';
 
 const TokenInfo = ({ addr }) => {
 
   const dispatch = useDispatch();
 
-  useEffect(() => {
-    dispatch(getTokens());
-  }, [])
-
   const { tokens } = useSelector((state) => state.data);
   const { isThere } = useSelector((state) => state.data);
-  const [query, setQuery] = useState("");
 
   let token;
   let burnRate = 0;
   let creatorRate = 0;
 
-  const onChange = (e) => {
-    setQuery(e.target.value);
-  }
-  const search = () => {
-    if (query.trim() === "") {
-      console.log("error")
-      dispatch(alert("error", "Query shouldn't be empty."));
-    } else
-      dispatch(searchonContract(query, addr));
-  }
+  let query = "mint";
+  useEffect(() => {
+    dispatch(getTokens());
+    dispatch(searchonContract(query, addr));
+  }, [])
+
   tokens.map((tk) => {
     if (tk.address === addr) {
       token = tk;
@@ -141,10 +132,6 @@ const TokenInfo = ({ addr }) => {
             </div>
           </div>
           <div className='mal'>
-            <div className='inputSection'>
-              <input type="text" placeholder="Place your query here." required value={query} onChange={onChange} />
-              <button className='search' onClick={search} disabled={token.malType.includes("Contract source code isn't verified.")}>Search</button>
-            </div>
             <div className='queryResult'>Result: {token.malType.includes("Contract source code isn't verified.") ? "Contract is not verified." : isThere && `There is "${query}" string in contract.`}</div>
           </div>
         </div>
