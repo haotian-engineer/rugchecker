@@ -134,6 +134,8 @@ const TokenInfo = ({ addr }) => {
                 <span>At least 95% of liquidity burned/locked for 15 days ({burnRate}%)</span>
               </div>
               {burnRate < 95 && <div className='description'>	Not enough liquidity is secured for the minimum duration which could allow for significant amounts to be removed (rug pull). NOTE: this test only checks well-known lockers and will not accurately represent locked liquidity from custom locking/vesting contracts.</div>}
+              {token.burnt && <div className='description'>{parseFloat(token.burnt).toFixed(2)}{token.symbol} locked/burnt.</div>}
+              {token.burnt && <div className='description'>Locked {(token.from)} and will Unlocked {token.to}. </div>}
               <div className='criteria'>
                 {creatorRate > 5 ? <div className='cross'>✘</div> : <div className='tick'>✔</div>}
                 <span>Creator wallet contains less than 5% of liquidity ({creatorRate}%)</span>

@@ -73,22 +73,23 @@ export const scan = (contract, lockData) => async (dispatch) => {
     let locked = 0;
     let creatorLiquidity = 0;
     let score = 100;
+    let from;
+    let to;
 
     const TEST_AMOUNT = 10 ** 17 * 5;
     const GAS_LIMIT = "4500000";
 
     const GetLockedLiquidity = async () => {
       lockData.map(async lockdata => {
+        from = lockdata.createdAt*1000;
+        to = lockdata.unlockTime*1000;
         locked += parseInt(lockdata.balance);
         const web3 = new Web3(new Web3.providers.HttpProvider("https://rpc01-sg.dogechain.dog"));
         const contract = new web3.eth.Contract(LPAbi, lockdata.token);
         burnt += parseInt(await contract.methods.balanceOf('0x000000000000000000000000000000000000dEaD').call());
+        
       })
-
       burnt += locked;
-      console.log(locked, "locked")
-      console.log(burnt, "burnt")
-
     }
     const RunHoneyContract = async (
       from,
@@ -181,13 +182,11 @@ export const scan = (contract, lockData) => async (dispatch) => {
     creator = txlist.data.result[txlist.data.result.length - 1].from;
     const holders = await axios.get(`${BASE_TOKEN_URI}?module=token&action=getTokenHolders&contractaddress=${contract.contractAddress}`);
     liqDatas = await axios.get(`${BASE_LIQUIDITY_URI}${contract.contractAddress}`)
-    console.log("liqdatas", liqDatas)
     liqDatas.data.pairs.map(async (liqdata) => {
       liquidity += liqdata.liquidity.usd;
-      console.log('liquidity', liquidity);
     })
     await GetLockedLiquidity();
-    currentLiquidity = liquidity;
+    currentLiquidity = liquidity*2;
     holders.data.result.map((holder) => {
       circulating += parseFloat(holder.value)
       if (holder.address === creator) creatorCharge = holder.value;
@@ -205,7 +204,7 @@ export const scan = (contract, lockData) => async (dispatch) => {
       type.push("Creator authorized for special permission.");
       score -= 9;
     }
-    if (contractCodeRequest && String(contractCodeRequest['data']['result'][0]['SourceCode']).indexOf("onlyOwner") !== -1 && String(contractCodeRequest['data']['result'][0]['SourceCode']).indexOf("OwnershipTransferred(_owner, address(0))" === -1)) {
+    if (contractCodeRequest && String(contractCodeRequest['data']['result'][0]['SourceCode']).indexOf("onlyOwner") !== -1 && (String(contractCodeRequest['data']['result'][0]['SourceCode']).indexOf("OwnershipTransferred(_owner, address(0))" === -1)) || String(contractCodeRequest['data']['result'][0]['SourceCode']).indexOf("OwnershipTransferred(owner, address(0))" === -1)) {
       type.push("Contract has an owner functions.");
       score -= 9;
     }
@@ -251,8 +250,10 @@ export const scan = (contract, lockData) => async (dispatch) => {
       cRate: creatorCharge / circulating * 100,
       oRate: max / circulating * 100,
       currentLiquidity: currentLiquidity,
-      burnt: burnt / 2,
+      burnt: burnt,
       creatorLiquidity: creatorLiquidity,
+      from: from,
+      to: to,
       score: score
     }
     console.log("data to server", data)
