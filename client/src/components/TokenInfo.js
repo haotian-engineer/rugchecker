@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
+
 import Section from './Section';
 import { getTokens, searchonContract } from '../actions/getAction';
+import { checking, response } from '../config/CheckingContract';
 
 const TokenInfo = ({ addr }) => {
 
@@ -14,14 +16,11 @@ const TokenInfo = ({ addr }) => {
   let token;
   let burnRate = 0;
   let creatorRate = 0;
-  // search on contract
-  let query = ["Ownable", "burn", "sss"];
-  let res = ["minted", "burnt", "sssss"];
   let report = [];
 
   useEffect(() => {
     dispatch(getTokens());
-    dispatch(searchonContract(query, addr));
+    dispatch(searchonContract(checking, addr));
   }, [])
 
   tokens.map((tk) => {
@@ -30,17 +29,17 @@ const TokenInfo = ({ addr }) => {
     }
   })
 
-  for (let i = 0; i < query.length; i++) {
+  for (let i = 0; i < checking.length; i++) {
     if (isThere[i]) {
-      report.push(`${res[i]}`);
+      report.push(`${response[i]}`);
     }
   }
-  console.log("report", report)
-  console.log("isThere", isThere)
-
   if (token && parseFloat(token.currentLiquidity) !== 0) {
-    burnRate = parseFloat(token.burnt / token.currentLiquidity).toFixed(2);
-    creatorRate = parseFloat(token.creatorLiquidity / token.currentLiquidity).toFixed(2);
+    burnRate = parseFloat(token.burnt / token.currentLiquidity).toFixed(2) * 100;
+    creatorRate = parseFloat(token.creatorLiquidity / token.currentLiquidity).toFixed(2) * 100;
+  } else if (token && parseFloat(token.burnt) !== 0) {
+    burnRate = 100;
+    creatorRate = 100;
   }
 
   return (
@@ -85,12 +84,12 @@ const TokenInfo = ({ addr }) => {
               {token.malType.includes("Contract is honeypot.") && <div className='description'>This token appears to be unsellable (ignore for presale).</div>}
               <div className='criteria'>
                 {(token.buyTax < 0 || token.buyTax > 5) ? <div className='cross'>✘</div> : <div className='tick'>✔</div>}
-                <span>Buy fee is less than 5% ({token.buyTax >= 0 ? parseFloat(token.buyTax).toFixed(2) : "-"})</span>
+                <span>Buy fee is less than 5% ({token.buyTax >= 0 ? parseFloat(token.buyTax).toFixed(2) : "-"}%)</span>
               </div>
               <div className='description'>This token has {token.buyTax >= 0 ? parseFloat(token.buyTax).toFixed(2) + "%" : "no"} buy fee.</div>
               <div className='criteria'>
                 {(token.sellTax < 0 || token.sellTax > 5) ? <div className='cross'>✘</div> : <div className='tick'>✔</div>}
-                <span>Sell fee is less than 5% ({token.sellTax >= 0 ? parseFloat(token.sellTax).toFixed(2) : "-"})</span>
+                <span>Sell fee is less than 5% ({token.sellTax >= 0 ? parseFloat(token.sellTax).toFixed(2) : "-"}%)</span>
               </div>
               <div className='description'>This token has {token.sellTax >= 0 ? parseFloat(token.sellTax).toFixed(2) + "%" : "no"} sell fee.</div>
               {token.sellTax > 5 && <div className='description'>Excessive fees are often sold for profit which can negatively affect the token's price.  Ask the project team how fees are being allocated and used.</div>}
@@ -127,24 +126,27 @@ const TokenInfo = ({ addr }) => {
               <div className='title'>Liquidity Analysis</div>
               <div className='criteria'>
                 {token.currentLiquidity < 1000 ? <div className='cross'>✘</div> : <div className='tick'>✔</div>}
-                <span>Adequate current liquidity</span>
+                <span>Adequate current liquidity ({parseFloat(token.currentLiquidity).toFixed(2)}USD)</span>
               </div>
               {token.currentLiquidity < 1000 && <div className='description'>	Not enough liquidity is present which could potentially cause high slippage and other problems when swapping (ignore for presale).</div>}
               <div className='criteria'>
-                {burnRate < 0.95 ? <div className='cross'>✘</div> : <div className='tick'>✔</div>}
-                <span>At least 95% of liquidity burned/locked for 15 days ({parseFloat(burnRate).toFixed(2) * 100}%)</span>
+                {burnRate < 95 ? <div className='cross'>✘</div> : <div className='tick'>✔</div>}
+                <span>At least 95% of liquidity burned/locked for 15 days ({burnRate}%)</span>
               </div>
-              {burnRate < 0.95 && <div className='description'>	Not enough liquidity is secured for the minimum duration which could allow for significant amounts to be removed (rug pull). NOTE: this test only checks well-known lockers and will not accurately represent locked liquidity from custom locking/vesting contracts.</div>}
+              {burnRate < 95 && <div className='description'>	Not enough liquidity is secured for the minimum duration which could allow for significant amounts to be removed (rug pull). NOTE: this test only checks well-known lockers and will not accurately represent locked liquidity from custom locking/vesting contracts.</div>}
               <div className='criteria'>
-                {creatorRate > 0.05 ? <div className='cross'>✘</div> : <div className='tick'>✔</div>}
-                <span>Creator wallet contains less than 5% of liquidity ({parseFloat(creatorRate).toFixed(2) * 100}%)</span>
+                {creatorRate > 5 ? <div className='cross'>✘</div> : <div className='tick'>✔</div>}
+                <span>Creator wallet contains less than 5% of liquidity ({creatorRate}%)</span>
               </div>
             </div>
             <div className='customeSearch'>
               <hr />
-              {report.map(rep => 
-              <div className='queryResult'>{rep}</div>
-              )}
+              {token.malType.includes("Contract source code isn't verified.") ?
+                <div className='queryResult'>Contract not verified</div> :
+                report.map(rep =>
+                  <div className='queryResult' key={rep}>{rep}</div>
+                )
+              }
             </div>
           </div>
         </div>
