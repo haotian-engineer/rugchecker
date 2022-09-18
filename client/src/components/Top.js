@@ -48,7 +48,6 @@ const Top = () => {
     let lockerData = [];
     const lockerManagerContract = await GetContract(tokenLockerManagerAbi, '0x016c1D8cf86f60A5382BA5c42D4be960CBd1b868');
     const lockIds = await lockerManagerContract.methods.getTokenLockersForAddress(getAddress(address)).call();
-
     lockIds.map(id => id)
       .reverse()
       .map(async (id) => {

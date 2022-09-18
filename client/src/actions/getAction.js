@@ -73,8 +73,8 @@ export const scan = (contract, lockData) => async (dispatch) => {
     let locked = 0;
     let creatorLiquidity = 0;
     let score = 100;
-    let from;
-    let to;
+    let from = -1;
+    let to = -1;
 
     const TEST_AMOUNT = 10 ** 17 * 5;
     const GAS_LIMIT = "4500000";
@@ -87,7 +87,7 @@ export const scan = (contract, lockData) => async (dispatch) => {
         const web3 = new Web3(new Web3.providers.HttpProvider("https://rpc01-sg.dogechain.dog"));
         const contract = new web3.eth.Contract(LPAbi, lockdata.token);
         burnt += parseInt(await contract.methods.balanceOf('0x000000000000000000000000000000000000dEaD').call());
-        
+        console.log("from", from);
       })
       burnt += locked;
     }
