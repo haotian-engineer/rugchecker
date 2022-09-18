@@ -91,6 +91,7 @@ export const scan = (contract, lockData) => async (dispatch) => {
       })
       burnt += locked;
     }
+    console.log("date", new Date(-1));
     const RunHoneyContract = async (
       from,
       honeyCheckerAddress,

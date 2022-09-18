@@ -28,7 +28,6 @@ const TokenInfo = ({ addr }) => {
       token = tk;
     }
   })
-
   for (let i = 0; i < checking.length; i++) {
     if (isThere[i]) {
       report.push(`${response[i]}`);
@@ -37,6 +36,8 @@ const TokenInfo = ({ addr }) => {
   if (token && parseFloat(token.currentLiquidity) !== 0) {
     burnRate = parseFloat(token.burnt / token.currentLiquidity).toFixed(2) * 100;
     creatorRate = parseFloat(token.creatorLiquidity / token.currentLiquidity).toFixed(2) * 100;
+    console.log("nwDate", new Date(token.from).getFullYear());
+
   } else if (token && parseFloat(token.burnt) !== 0) {
     burnRate = 100;
     creatorRate = 100;
@@ -135,7 +136,7 @@ const TokenInfo = ({ addr }) => {
               </div>
               {burnRate < 95 && <div className='description'>	Not enough liquidity is secured for the minimum duration which could allow for significant amounts to be removed (rug pull). NOTE: this test only checks well-known lockers and will not accurately represent locked liquidity from custom locking/vesting contracts.</div>}
               {token.burnt && <div className='description'>{parseFloat(token.burnt).toFixed(2)}{token.symbol} locked/burnt.</div>}
-              {token.from > 0 && <div className='description'>Locked {(token.from)} and will Unlocked {token.to}. </div>}
+              {new Date(token.from).getFullYear() > 1980 && <div className='description'>Locked {(token.from)} and will Unlocked {token.to}. </div>}
               <div className='criteria'>
                 {creatorRate > 5 ? <div className='cross'>✘</div> : <div className='tick'>✔</div>}
                 <span>Creator wallet contains less than 5% of liquidity ({creatorRate}%)</span>
